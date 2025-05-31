@@ -41,8 +41,16 @@ if uploaded_file is not None:
 
         df_general["result"] = label_encoder.inverse_transform(pred)
 
-        st.success("✅ 예측 완료!")
-        st.dataframe(df_general)
+        # 확률 추출
+        df_general["승확률"] = proba_ensemble[:, label_encoder.transform(["승"])[0]]
+        df_general["무확률"] = proba_ensemble[:, label_encoder.transform(["무"])[0]]
+        df_general["패확률"] = proba_ensemble[:, label_encoder.transform(["패"])[0]]
 
-        csv = df_general.to_csv(index=False).encode("utf-8-sig")
+        # 필요한 컬럼만 정리
+        df_output = df_general[["name", "type", "hand", "result", "승확률", "무확률", "패확률"]]
+
+        st.success("✅ 예측 완료!")
+        st.dataframe(df_output)
+
+        csv = df_output.to_csv(index=False).encode("utf-8-sig")
         st.download_button("📥 예측 결과 다운로드", csv, "prediction_result.csv", "text/csv")
